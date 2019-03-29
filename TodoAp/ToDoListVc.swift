@@ -11,13 +11,21 @@ import UIKit
 class ToDoListVc: UITableViewController {
     
     var itemArray = ["Buy Eggs", "Book Leave", "Finish testing"]
+    
+    // For data persistence
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        // Update array with user default --> contains after app terminated
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+            itemArray = items
+        }
+        
     }
     
-    //MARK - Tableview Datasource Methods
+    //MARK: - Tableview Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -28,7 +36,7 @@ class ToDoListVc: UITableViewController {
         return cell
     }
     
-    //MARK - Tableview Delegate Methods
+    //MARK: - Tableview Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        print("Item to do is: ", itemArray[indexPath.row])
@@ -43,7 +51,7 @@ class ToDoListVc: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    //MARK - Add New Itemss
+    // MARK: - Add New Itemss
     @IBAction func addBtnPressed(_ sender: Any) {
         var textField = UITextField()
         let alert1 = UIAlertController(title: "Add New To Do Item", message: "", preferredStyle: .alert)
@@ -51,7 +59,9 @@ class ToDoListVc: UITableViewController {
         // What will happen once user clicks Add Item btn on our UIAlert
 //           print("Txtfield: ", textField.text)
             self.itemArray.append(textField.text!)
-            print(self.itemArray)
+            // Save updated item array to our user default
+            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+//            print(self.itemArray)
             self.tableView.reloadData()
             
         }
