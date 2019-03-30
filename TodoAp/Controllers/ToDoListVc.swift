@@ -15,36 +15,42 @@ class ToDoListVc: UITableViewController {
     var itemArray = [Item]()
     
     // For data persistence
-    let defaults = UserDefaults.standard
+//    let defaults = UserDefaults.standard
+    
+    // Creata path to new pList
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
+//        print("File Path >> ", dataFilePath)
         
-        let newItem = Item()
-        newItem.title = "Marco"
-        itemArray.append(newItem)
-        
-        let newItem2 = Item()
-        newItem2.title = "Buy Eggs"
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item()
-        newItem3.title = "Book Leave 2t"
-        itemArray.append(newItem3)
-        
-        let newItem4 = Item()
-        newItem4.title = "Finish testing 4t"
-        itemArray.append(newItem4)
+        //Remove for decodable method
+//        let newItem = Item()
+//        newItem.title = "Marco"
+//        itemArray.append(newItem)
+//
+//        let newItem2 = Item()
+//        newItem2.title = "Buy Eggs"
+//        itemArray.append(newItem2)
+//
+//        let newItem3 = Item()
+//        newItem3.title = "Book Leave 2t"
+//        itemArray.append(newItem3)
+//
+//        let newItem4 = Item()
+//        newItem4.title = "Finish testing 4t"
+//        itemArray.append(newItem4)
 
+        loadItems()
         // Update array with user default --> contains after app terminated
         // retrieving an array of strings here
 //        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
 //            itemArray = items
 //        }
         // We're now retrieving an array of Item objects
-        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
-            itemArray = items
-        }
+//        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
+//            itemArray = items
+//        }
         
     }
     
@@ -98,8 +104,8 @@ class ToDoListVc: UITableViewController {
 //            // Add checkmark when cell selected
 //            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
 //        }
-        
-        tableView.reloadData()
+        self.saveItems()
+//        tableView.reloadData()
 
         // Flashes grey only briefly when selected
         tableView.deselectRow(at: indexPath, animated: true)
@@ -118,9 +124,11 @@ class ToDoListVc: UITableViewController {
             self.itemArray.append(newItm)
 //            self.itemArray.append(textField.text!)
             // Save updated item array to our user default
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+//            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+
 //            print(self.itemArray)
-            self.tableView.reloadData()
+//            self.tableView.reloadData()
+            self.saveItems()
             
         }
         
@@ -131,6 +139,30 @@ class ToDoListVc: UITableViewController {
         }
         alert1.addAction(action1)
         present(alert1, animated: true, completion: nil)
+    }
+    
+    func saveItems() {
+        
+        // Instead of user defaults, we can also use encoder for similar purpose
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding array")
+        }
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+               itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Decoding error")
+            }
+        }
     }
 }
 
